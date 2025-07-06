@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import { EnvChoice } from "../interfaces/types.js";
-
-const QUERIES_DIR = 'queries';
+import { QUERIES_DIR } from "../constants.js";
 
 export const useGetQueries = (addMessage: (message: string, type?: 'info' | 'error') => void) => {
     const [queryFiles, setQueryFiles] = useState<EnvChoice[] | null>(null);

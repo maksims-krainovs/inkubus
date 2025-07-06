@@ -1,30 +1,37 @@
 import React, { useState } from "react";
 import { Text } from "ink";
 import { EnvSelection } from "./EnvSelection.js";
-import { QuerySelection } from "./QuerySelection.js";
-import { QueryResult } from "./QueryResult.js";
+import { QuerySelection } from "./QueryViews/QuerySelection.js";
+import { ActiveQuery } from "./QueryViews/ActiveQuery.js";
+import { ActiveEnv } from "./EnvViews/ActiveEnv.js";
 import { DbResult } from "./DbResult.js";
 import { EnvChoice, ViewMode } from "./interfaces/types.js";
 import { executeQuery } from "./db/index.js";
+import { parseEnvFile } from "./utils/parsing.js";
 
-const MainWindow = ({ envNames, queryFiles, addMessage }: { envNames: EnvChoice[] | null, queryFiles: EnvChoice[] | null, addMessage: (message: string, type?: 'info' | 'error') => void }) => {
+export const MainWindow = ({ envNames, queryFiles, addMessage }: { envNames: EnvChoice[] | null, queryFiles: EnvChoice[] | null, addMessage: (message: string, type?: 'info' | 'error') => void }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('select');
+    const [envFileName, setEnvFileName] = useState<string>('');
+    const [envContent, setEnvContent] = useState<string>('');
     const [parsedEnv, setParsedEnv] = useState<Record<string, string>>({});
     const [queryContent, setQueryContent] = useState('');
     const [dbResult, setDbResult] = useState<any[] | { error: string } | null>(null);
 
-    const handleEnvSelect = (parsed: Record<string, string>) => {
-        setParsedEnv(parsed);
+    const handleEnvSelect = (fileName: string, envContent: string) => {
+        setEnvFileName(fileName);
+        setEnvContent(envContent);
+        setViewMode('active_env');
+    };
+
+    const handleEnvConfirm = (envContent: string) => {
+        setEnvContent(envContent);
+        setParsedEnv(parseEnvFile(envContent));
         setViewMode('panels');
     };
 
     const handleQuerySelect = (_query: string, content: string) => {
         setQueryContent(content);
         setViewMode('result');
-    };
-
-    const handleGoBack = () => {
-        setViewMode('panels');
     };
 
     const handleExecute = async (query: string) => {
@@ -39,26 +46,13 @@ const MainWindow = ({ envNames, queryFiles, addMessage }: { envNames: EnvChoice[
         }
     };
 
-    if (viewMode === 'loading') {
-        return <Text>Executing query...</Text>;
+    switch(viewMode) {
+        case 'loading':  return <Text>Executing query...</Text>;
+        case 'db_result':  return <DbResult result={dbResult || { error: 'No result received' }} onGoBack={() => setViewMode('panels')} />;
+        case 'result': return <ActiveQuery content={queryContent} onExecute={handleExecute} onGoBack={() => setViewMode('panels')} />;
+        case 'active_env': return <ActiveEnv fileName={envFileName} content={envContent} onConfirm={handleEnvConfirm} onGoBack={() => setViewMode('select')} addMessage={addMessage} />;
+        case 'panels': return <QuerySelection queryFiles={queryFiles} envContent={envContent} addMessage={addMessage} onSelect={handleQuerySelect} onGoBack={() => setViewMode('select')} />;
     }
-
-    if (viewMode === 'db_result' && dbResult) {
-        return <DbResult result={dbResult} onGoBack={() => setViewMode('panels')} />;
-    }
-
-    if (viewMode === 'result') {
-        return <QueryResult content={queryContent} onExecute={handleExecute} onGoBack={handleGoBack} />;
-    }
-
-    const handleGoFromQuery = () => {
-        setViewMode('select');
-    };
-
-    if (viewMode === 'panels') {
-        return <QuerySelection queryFiles={queryFiles} parsedEnv={parsedEnv} addMessage={addMessage} onSelect={handleQuerySelect} onGoBack={handleGoFromQuery} />;
-    }
-
     return <EnvSelection envNames={envNames} addMessage={addMessage} onSelect={handleEnvSelect} />;
 }
 

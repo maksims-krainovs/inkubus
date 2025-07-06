@@ -8,5 +8,8 @@ export interface Message {
     type: 'info' | 'error';
 }
 
-export type ViewMode = 'select' | 'panels' | 'result' | 'db_result' | 'loading';
+export type ViewMode = 'select' | 'panels' | 'result' | 'loading' | 'db_result' | 'active_env';
 export type ActivePanel = 'query' | 'menu';
+export type Mode = 'view' | 'edit';
+
+export type QueryViewMode = 'view' | 'edit';
