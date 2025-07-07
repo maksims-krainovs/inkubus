@@ -10,16 +10,3 @@ $ npm install --global inkubus
 
 ## CLI
 
-```
-$ inkubus --help
-
-  Usage
-    $ inkubus
-
-  Options
-    --name  Your name
-
-  Examples
-    $ inkubus --name=Jane
-    Hello, Jane
-```
