@@ -3,61 +3,57 @@ import SelectInput from "ink-select-input";
 import React, { useState } from "react";
 import { ActiveQueryProps } from "../interfaces/props.js";
 import { ActivePanel, Mode } from "../interfaces/types.js";
-import TextInput from "ink-text-input";
 import SyntaxHighlight from 'ink-syntax-highlight';
 import { getQueryMenuItems } from "./utils.js";
-import { useTabKey } from "../hooks/useTabKey.js";
+import { useTabKey, useSaveFile, useSelectHandler } from "../hooks/index.js";
+import { MultiLineInput, ContentPanel, MenuPanel } from '../components/index.js';
+import path from 'path';
+import { QUERIES_DIR } from '../constants.js';
 
-export const ActiveQuery = ({ content, onExecute, onGoBack }: ActiveQueryProps) => {
+export const ActiveQuery = ({ fileName, content, onExecute, onGoBack, addMessage }: ActiveQueryProps) => {
     const [query, setQuery] = useState(content);
     const [activePanel, setActivePanel] = useState<ActivePanel>('menu');
     const [mode, setMode] = useState<Mode>('view');
+    const { saveFile } = useSaveFile(addMessage, () => setMode('view'));
 
     useTabKey(() => {
         setActivePanel((prev: ActivePanel) => (prev === 'query' ? 'menu' : 'query'));
     }, mode === 'edit');
 
-    const handleSelect = (item: { label: string, value: string }) => {
-        if (item.value === 'toggleMode') {
-            const newMode = mode === 'view' ? 'edit' : 'view';
-            setMode(newMode);
-            setActivePanel(newMode === 'edit' ? 'query' : 'menu');
-        } else if (item.value === 'execute') {
-            onExecute(query);
-        } else if (item.value === 'back') {
-            onGoBack();
-        }
+    const handleSave = () => {
+        const filePath = path.join(process.cwd(), QUERIES_DIR, fileName);
+        saveFile(filePath, query);
     };
+
+    const handleSelect = useSelectHandler({
+        mode,
+        setMode,
+        setActivePanel,
+        handleSave,
+        onGoBack,
+        onExecute: () => onExecute(query),
+    });
 
     return (
         <Box flexDirection="column">
-            <Box
-                borderStyle={mode === 'edit' && activePanel === 'query' ? 'double' : 'single'}
-                borderColor={mode === 'view' ? 'gray' : (activePanel === 'query' ? 'green' : 'blue')}
-                flexDirection="column"
-                padding={1}
-            >
+            <ContentPanel mode={mode} activePanel={activePanel}>
                 {mode === 'view' ? (
                     <SyntaxHighlight code={query} language="sql" />
                 ) : (
-                    <TextInput
+                    <MultiLineInput
                         value={query}
                         onChange={setQuery}
                         focus={activePanel === 'query'}
                     />
                 )}
-            </Box>
-            <Box
-                borderStyle={activePanel === 'menu' ? 'double' : 'single'}
-                borderColor={activePanel === 'menu' ? 'green' : 'blue'}
-                padding={1}
-            >
+            </ContentPanel>
+            <MenuPanel activePanel={activePanel}>
                 <SelectInput
                     items={getQueryMenuItems(mode)}
                     onSelect={handleSelect}
                     isFocused={activePanel === 'menu'}
                 />
-            </Box>
+            </MenuPanel>
         </Box>
     );
 };

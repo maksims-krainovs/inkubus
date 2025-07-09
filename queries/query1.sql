@@ -1,1 +1,1 @@
-query 1
+select * from test

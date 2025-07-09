@@ -14,6 +14,7 @@ export const MainWindow = ({ envNames, queryFiles, addMessage }: { envNames: Env
     const [envFileName, setEnvFileName] = useState<string>('');
     const [envContent, setEnvContent] = useState<string>('');
     const [parsedEnv, setParsedEnv] = useState<Record<string, string>>({});
+    const [queryFileName, setQueryFileName] = useState<string>('');
     const [queryContent, setQueryContent] = useState('');
     const [dbResult, setDbResult] = useState<any[] | { error: string } | null>(null);
 
@@ -29,7 +30,8 @@ export const MainWindow = ({ envNames, queryFiles, addMessage }: { envNames: Env
         setViewMode('panels');
     };
 
-    const handleQuerySelect = (_query: string, content: string) => {
+    const handleQuerySelect = (query: string, content: string) => {
+        setQueryFileName(query);
         setQueryContent(content);
         setViewMode('result');
     };
@@ -49,7 +51,7 @@ export const MainWindow = ({ envNames, queryFiles, addMessage }: { envNames: Env
     switch(viewMode) {
         case 'loading':  return <Text>Executing query...</Text>;
         case 'db_result':  return <DbResult result={dbResult || { error: 'No result received' }} onGoBack={() => setViewMode('panels')} />;
-        case 'result': return <ActiveQuery content={queryContent} onExecute={handleExecute} onGoBack={() => setViewMode('panels')} />;
+        case 'result': return <ActiveQuery fileName={queryFileName} content={queryContent} onExecute={handleExecute} onGoBack={() => setViewMode('panels')} addMessage={addMessage} />;
         case 'active_env': return <ActiveEnv fileName={envFileName} content={envContent} onConfirm={handleEnvConfirm} onGoBack={() => setViewMode('select')} addMessage={addMessage} />;
         case 'panels': return <QuerySelection queryFiles={queryFiles} envContent={envContent} addMessage={addMessage} onSelect={handleQuerySelect} onGoBack={() => setViewMode('select')} />;
     }

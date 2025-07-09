@@ -15,9 +15,11 @@ export interface QuerySelectionProps {
 }
 
 export interface ActiveQueryProps {
+    fileName: string;
     content: string;
     onExecute: (query: string) => void;
     onGoBack: () => void;
+    addMessage: (message: string, type?: 'info' | 'error') => void;
 }
 
 export interface ActiveEnvProps {

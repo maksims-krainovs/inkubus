@@ -7,7 +7,7 @@ import { useHighlight } from "./hooks/useHighlight.js";
 import { CONFIG_DIR } from "./constants.js";
 
 export const EnvSelection = ({ envNames, addMessage, onSelect }: EnvSelectionProps) => {
-    const { fileContent, validationResult, handleHighlight, highlightedItem } = useHighlight(addMessage);
+    const { fileContent, handleHighlight, highlightedItem } = useHighlight(addMessage);
 
     useEffect(() => {
         if (envNames && envNames.length > 0 && envNames[0]) {
@@ -18,7 +18,7 @@ export const EnvSelection = ({ envNames, addMessage, onSelect }: EnvSelectionPro
     }, [envNames, handleHighlight, addMessage]);
 
     const handleSelect = () => {
-        if (validationResult.isValid && highlightedItem) {
+        if (highlightedItem) {
             onSelect(highlightedItem.value, fileContent);
         }
     };
