@@ -12,7 +12,16 @@ export const validateFile = (content: string): { isValid: boolean, missingKeys: 
     }
 
     const parsed = parseEnvFile(content);
-    const requiredKeys = ['DB_USER', 'DB_PASSWORD', 'DB_DATABASE'];
+    const dbType = parsed['DB_TYPE'];
+
+    let requiredKeys: string[] = [];
+    if (dbType === 'sqlite') {
+        requiredKeys = ['DB_PATH'];
+    } else {
+        // Default to mssql validation
+        requiredKeys = ['DB_USER', 'DB_PASSWORD', 'DB_DATABASE'];
+    }
+
     const missingKeys = requiredKeys.filter(key => !(key in parsed));
 
     return {

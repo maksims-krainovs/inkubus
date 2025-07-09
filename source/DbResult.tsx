@@ -1,5 +1,6 @@
 import { Box, Text, useInput } from "ink";
 import React from "react";
+import Table from "./components/Table.js";
 
 interface DbResultProps {
     result: any[] | { error: string };
@@ -15,6 +16,9 @@ export const DbResult = ({ result, onGoBack }: DbResultProps) => {
         return (
             <Box flexDirection="column">
                 <Text>Query Result:</Text>
+                <Table data={result} />
+                <Text> </Text>
+                <Text>Raw Result:</Text>
                 {result.map((row, i) => (
                     <Text key={i}>{JSON.stringify(row)}</Text>
                 ))}
