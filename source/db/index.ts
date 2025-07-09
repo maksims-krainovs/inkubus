@@ -6,6 +6,7 @@ export const executeQuery = async (config: Record<string, string>, query: string
         password: config['DB_PASSWORD'],
         server: config['DB_SERVER'] || 'localhost',
         database: config['DB_DATABASE'],
+        port: Number(config['DB_PORT']) || 1433,
         options: {
             encrypt: true, // Use this if you're on Azure
             trustServerCertificate: true // Change to true for local dev / self-signed certs
